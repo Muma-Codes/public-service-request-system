@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base: element defaults */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-cream font-sans text-base text-ink antialiased;
+  }
+
+  /* Fallback focus indicator; components refine it with rings */
+  :focus-visible {
+    outline: 2px solid #1d4ed8;
+    outline-offset: 2px;
+  }
+
+  /* Respect users who prefer less motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Components: tiny reusable text styles */
+@layer components {
+  .page-title {
+    @apply text-2xl font-semibold md:text-3xl;
+  }
+  .section-title {
+    @apply text-lg font-semibold;
+  }
+  .helper-text {
+    @apply text-sm text-ink-muted;
+  }
+  .link {
+    @apply text-brand-600 underline-offset-2 hover:underline;
+  }
+}
