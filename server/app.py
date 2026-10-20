@@ -1,7 +1,10 @@
 from flask import Flask
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
+from dotenv import load_dotenv
 from datetime import timedelta
+
+import os
 
 from models import db
 from models.citizen import Citizen
@@ -11,17 +14,19 @@ from models.service_category import ServiceCategory
 # bring in all blueprints from the routes package
 from routes import auth_bp, citizens_bp, categories_bp, service_requests_bp
 
+load_dotenv() # reads variables from .env file and sets them in os.environ
+
 # create a Flask application object
 app = Flask(__name__)
 
 # configure a database connection to the local file app
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///publicservicerequestsystem.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
 
 # disable modification tracking to use less memory
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # JWT configuration — required by @jwt_required / @admin_required
-app.config['JWT_SECRET_KEY'] = 'change-me-in-production'
+app.config['JWT_SECRET_KEY'] = os.getenv("JWT_SECRET_KEY")
 
 # Access tokens are short-lived. Clients refresh using the refresh token.
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
