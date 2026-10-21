@@ -36,6 +36,13 @@ export const PASSWORD_RULES = [
   },
 ];
 
+const validateName = (value) => {
+  const name = value.trim();
+  if (!name) return "Enter your full name.";
+  if (name.length > 50) return "Name must not exceed 50 characters.";
+  return undefined;
+};
+
 const validatePhone = (value) => {
   // The backend ignores spaces, dashes and brackets
   const phone = value.replace(/[\s\-()]/g, "");
@@ -50,6 +57,11 @@ const validatePassword = (value) => {
   return PASSWORD_RULES.find((rule) => !rule.test(value))?.message;
 };
 
+const validateConfirmation = (confirmation, password) => {
+  if (!confirmation) return "Re-enter your password.";
+  return confirmation !== password ? "Passwords don’t match." : undefined;
+};
+
 export const validateLogin = (values) =>
   compact({
     // Login only checks presence, so the server decides what counts as valid
@@ -59,20 +71,47 @@ export const validateLogin = (values) =>
     password: values.password ? undefined : "Enter your password.",
   });
 
-export const validateRegistration = (values) => {
-  const name = values.name.trim();
-  return compact({
-    name: !name
-      ? "Enter your full name."
-      : name.length > 50
-        ? "Name must not exceed 50 characters."
-        : undefined,
+export const validateRegistration = (values) =>
+  compact({
+    name: validateName(values.name),
     phone_number: validatePhone(values.phone_number),
     password: validatePassword(values.password),
-    confirm_password: !values.confirm_password
-      ? "Re-enter your password."
-      : values.confirm_password !== values.password
-        ? "Passwords don’t match."
-        : undefined,
+    confirm_password: validateConfirmation(
+      values.confirm_password,
+      values.password,
+    ),
   });
-};
+
+export const validateProfile = (values) =>
+  compact({
+    name: validateName(values.name),
+    phone_number: validatePhone(values.phone_number),
+  });
+
+export const validatePasswordChange = (values) =>
+  compact({
+    current_password: values.current_password
+      ? undefined
+      : "Enter your current password.",
+    new_password: validatePassword(values.new_password),
+    confirm_password: validateConfirmation(
+      values.confirm_password,
+      values.new_password,
+    ),
+  });
+
+export const validateRequestDetails = (values) =>
+  compact({
+    location: values.location.trim()
+      ? undefined
+      : "Enter where the problem is.",
+    description: values.description.trim()
+      ? undefined
+      : "Describe the problem.",
+  });
+
+export const validateServiceRequest = (values) =>
+  compact({
+    category_id: values.category_id ? undefined : "Choose a category.",
+    ...validateRequestDetails(values),
+  });
