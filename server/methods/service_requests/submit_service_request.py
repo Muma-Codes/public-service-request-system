@@ -5,6 +5,7 @@ from models import db
 from models.citizen import Citizen
 from models.service_category import ServiceCategory
 from models.service_request import CitizenServiceRequest
+from models.service_request_status_history import ServiceRequestStatusHistory
 from utils.auth import get_current_citizen
 
 
@@ -93,6 +94,14 @@ def submit_service_request():
         image_url=image_url,
         submitted_by=current_citizen.citizen_id,
         status="Pending",
+    )
+
+    # First entry in the status history: the request starts as Pending
+    new_request.status_history.append(
+        ServiceRequestStatusHistory(
+            status="Pending",
+            changed_by=current_citizen.citizen_id,
+        )
     )
 
     db.session.add(new_request)

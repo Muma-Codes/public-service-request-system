@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required
 
 from models import db
 from models.service_request import CitizenServiceRequest, REQUEST_STATUSES
+from models.service_request_status_history import ServiceRequestStatusHistory
 from utils.auth import get_current_citizen
 
 # Admins may change status. Owners may only correct the description/location/image.
@@ -14,7 +15,7 @@ CITIZEN_FIELDS = {"location", "description", "image_url"}
 def update_service_request(id):
     """
     - An admin can update `status` (must be one of REQUEST_STATUSES) and the
-      descriptive fields.
+      descriptive fields. Every real status change is recorded in the status history.
     - The owner may only edit location / description / image_url while the
       request is still "Pending".
     - Once resolved or in progress, only admins can modify the request.
@@ -96,11 +97,12 @@ def update_service_request(id):
 
     # Validate everything first. Apply only if all checks pass
     changes = {}
+    new_status = None  # set only when the status really changes
 
     if "status" in request.form:
-        new_status = request.form.get("status")
+        requested_status = request.form.get("status")
 
-        if new_status not in REQUEST_STATUSES:
+        if requested_status not in REQUEST_STATUSES:
             message = f"status must be one of: {', '.join(REQUEST_STATUSES)}."
             status_code = 400
 
@@ -110,9 +112,12 @@ def update_service_request(id):
             )
             return response
 
-        changes["status"] = new_status
-        # Stamp who made the change
-        changes["status_updated_by"] = current_citizen.citizen_id
+        # Re-sending the current status is not a change, so it is not recorded
+        if requested_status != service_request.status:
+            new_status = requested_status
+            changes["status"] = new_status
+            # Stamp who made the change
+            changes["status_updated_by"] = current_citizen.citizen_id
 
     if "location" in request.form:
         location = request.form.get("location")
@@ -150,6 +155,15 @@ def update_service_request(id):
 
     for attr, value in changes.items():
         setattr(service_request, attr, value)
+
+    # Record the status change with its own timestamp
+    if new_status is not None:
+        service_request.status_history.append(
+            ServiceRequestStatusHistory(
+                status=new_status,
+                changed_by=current_citizen.citizen_id,
+            )
+        )
 
     db.session.add(service_request)
     db.session.commit()

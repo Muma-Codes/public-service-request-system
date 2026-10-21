@@ -18,7 +18,7 @@ REQUEST_STATUSES = ("Pending", "In Progress", "Resolved")
 class CitizenServiceRequest(db.Model, SerializerMixin):
     __tablename__ = "citizen_service_requests"
 
-    serialize_rules = ('-citizen.service_requests', '-citizen.update_service_requests_status', '-update_status.update_service_requests_status', '-update_status.service_requests', '-category.service_requests')
+    serialize_rules = ('-citizen.password', '-citizen.service_requests', '-citizen.update_service_requests_status', '-citizen.add_categories', '-citizen.update_categories', '-update_status', '-category.admin_add', '-category.admin_update', '-status_history.service_request', '-category.service_requests')
 
     service_request_id: Mapped[int] = mapped_column(primary_key=True)
     category_id: Mapped[int] = mapped_column(ForeignKey("service_categories.service_category_id"))
@@ -29,11 +29,17 @@ class CitizenServiceRequest(db.Model, SerializerMixin):
     status_updated_by: Mapped[Optional[int]] = mapped_column(ForeignKey("citizens.citizen_id"), nullable=True)
     status: Mapped[str] = mapped_column(String(20), default="Pending")
     submitted_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime, onupdate=func.now())
+    updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True, onupdate=func.now())
 
     citizen: Mapped["Citizen"] = relationship(back_populates="service_requests", foreign_keys=[submitted_by])
     category: Mapped["ServiceCategory"] = relationship(back_populates="service_requests")
     update_status: Mapped[Optional["Citizen"]] = relationship(back_populates="update_service_requests_status", foreign_keys=[status_updated_by])
+    # Oldest first; history_id breaks ties when two changes land in the same second
+    status_history: Mapped[List["ServiceRequestStatusHistory"]] = relationship(
+        back_populates="service_request",
+        cascade="all, delete-orphan",
+        order_by="ServiceRequestStatusHistory.updated_at, ServiceRequestStatusHistory.history_id",
+    )
 
     __table_args__ = (
         CheckConstraint(
