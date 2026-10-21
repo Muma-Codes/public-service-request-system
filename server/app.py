@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 from dotenv import load_dotenv
 from datetime import timedelta
 
@@ -20,7 +21,7 @@ load_dotenv() # reads variables from .env file and sets them in os.environ
 app = Flask(__name__)
 
 # configure a database connection to the local file app
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI")
 
 # disable modification tracking to use less memory
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -32,6 +33,7 @@ app.config['JWT_SECRET_KEY'] = os.getenv("JWT_SECRET_KEY")
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
 app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
 
+CORS(app, origins=[os.getenv("FRONTEND_URL")], methods=["GET", "POST", "PATCH", "DELETE"], allow_headers=["Content-Type", "Authorization"], supports_credentials=True)
 
 # create a migrate object to manage schema modification
 migrate = Migrate(app, db)
