@@ -8,3 +8,5 @@ python-dotenv==1.2.4
 SQLAlchemy==2.0.29
 sqlalchemy_serializer==1.6.3
 Werkzeug==3.1.9
+psycopg2-binary
+gunicorn
