@@ -21,7 +21,7 @@ load_dotenv() # reads variables from .env file and sets them in os.environ
 app = Flask(__name__)
 
 # configure a database connection to the local file app
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI")
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
 
 # disable modification tracking to use less memory
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
