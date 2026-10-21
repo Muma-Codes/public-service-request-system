@@ -33,7 +33,13 @@ app.config['JWT_SECRET_KEY'] = os.getenv("JWT_SECRET_KEY")
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
 app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
 
-CORS(app, origins=[os.getenv("FRONTEND_URL")], methods=["GET", "POST", "PATCH", "DELETE"], allow_headers=["Content-Type", "Authorization"], supports_credentials=True)
+origins = [
+    o.strip()
+    for o in os.getenv("FRONTEND_URL", "").split(",")
+    if o.strip()
+]
+
+CORS(app, origins=origins, methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"], allow_headers=["Content-Type", "Authorization"], supports_credentials=True)
 
 # create a migrate object to manage schema modification
 migrate = Migrate(app, db)
