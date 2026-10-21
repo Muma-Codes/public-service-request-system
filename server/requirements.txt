@@ -5,7 +5,7 @@ Flask_JWT_Extended==4.6.0
 Flask_Migrate==4.0.7
 flask_sqlalchemy==3.1.1
 python-dotenv==1.2.4
-SQLAlchemy>=2.0.36
+SQLAlchemy>=2.0.36,<2.1
 sqlalchemy_serializer==1.6.3
 Werkzeug==3.1.9
 psycopg2-binary
