@@ -22,7 +22,7 @@ class ServiceCategory(db.Model, SerializerMixin):
     added_by: Mapped[int] = mapped_column(ForeignKey("citizens.citizen_id"))
     updated_by: Mapped[Optional[int]] = mapped_column(ForeignKey("citizens.citizen_id"))
     added_at: Mapped[datetime] = mapped_column(DateTime(), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime(), onupdate=func.now())
+    updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True, onupdate=func.now())
 
     admin_add: Mapped["Citizen"] = relationship(back_populates="add_categories", foreign_keys=[added_by])
     admin_update: Mapped[Optional["Citizen"]] = relationship(back_populates="update_categories", foreign_keys=[updated_by])

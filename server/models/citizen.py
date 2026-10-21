@@ -1,5 +1,6 @@
 from . import db
 from typing import List
+from typing import Optional
 from sqlalchemy import String
 from sqlalchemy import Boolean
 from sqlalchemy import DateTime
@@ -21,9 +22,9 @@ class Citizen(db.Model, SerializerMixin):
     name: Mapped[str] = mapped_column(String(50))
     phone_number: Mapped[str] = mapped_column(String(13))
     is_admin: Mapped[bool] = mapped_column(Boolean(), default=False)
-    password: Mapped[str] = mapped_column(String(50))
+    password: Mapped[str] = mapped_column(String(255))
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime, onupdate=func.now())
+    updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True, onupdate=func.now())
 
     service_requests: Mapped[List["CitizenServiceRequest"]] = relationship(back_populates="citizen", foreign_keys="CitizenServiceRequest.submitted_by", cascade="all, delete-orphan")
     update_service_requests_status: Mapped[List["CitizenServiceRequest"]] = relationship(back_populates="update_status", foreign_keys="CitizenServiceRequest.status_updated_by", cascade="all, delete-orphan")

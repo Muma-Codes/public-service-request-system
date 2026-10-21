@@ -3,9 +3,9 @@ from flask import Blueprint
 from methods.categories import (
     add_service_category,
     delete_service_category,
-    get_categories,
-    get_category,
-    update_category,
+    get_service_categories,
+    get_service_category,
+    update_service_category,
 )
 
 # Blueprint for all /categories endpoints
